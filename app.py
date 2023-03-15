@@ -28,7 +28,7 @@ def generate_gpt4_response(prompt, system_prompt):
         model="gpt-4",
         messages=[{"role": "system", "content": system_prompt},
                   {"role": "user", "content": prompt}],
-        max_tokens=100,
+        max_tokens=2000,
         n=1,
         temperature=0.5,
     )
