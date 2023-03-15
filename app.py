@@ -1,7 +1,7 @@
 # Import required libraries
 import os
 import re
-from flask import Flask, request
+from flask import Flask, request, jsonify
 import slack
 from slack import WebClient
 from slackeventsapi import SlackEventAdapter
@@ -23,10 +23,10 @@ slack_events_adapter = SlackEventAdapter(SLACK_SIGNING_SECRET, "/slack/events", 
 openai.api_key = GPT4_API_TOKEN
 
 # Function to generate a response from GPT-4
-def generate_gpt4_response(prompt):
+def generate_gpt4_response(prompt, system_prompt):
     response = openai.ChatCompletion.create(
         model="gpt-4",
-        messages=[{"role": "system", "content": "You are a helpful assistant."},
+        messages=[{"role": "system", "content": system_prompt},
                   {"role": "user", "content": prompt}],
         max_tokens=100,
         n=1,
@@ -43,8 +43,23 @@ def handle_message(event_data):
 
     # Check if the bot is mentioned directly
     if re.search(f"<@{bot_user_id}>", user_input):
-        gpt4_response = generate_gpt4_response(user_input)
+        gpt4_response = generate_gpt4_response(user_input, "You are a helpful assistant.")
         slack_client.chat_postMessage(channel=event["channel"], text=gpt4_response)
+
+# Handle Slash command
+@app.route("/code", methods=["POST"])
+def handle_code_slash_command():
+    data = request.form
+    user_input = data.get("text")
+    response_url = data.get("response_url")
+
+    # Verify the request is from Slack
+    if not slack.signature.verify_signature(request):
+        return jsonify({"error": "Invalid request"}), 403
+
+    gpt4_response = generate_gpt4_response(user_input, "You are a code-writing assistant.")
+    slack_client.chat_postMessage(channel=response_url, text=gpt4_response)
+    return jsonify({"response_type": "in_channel", "text": gpt4_response})
 
 # Start the Flask app
 if __name__ == "__main__":
