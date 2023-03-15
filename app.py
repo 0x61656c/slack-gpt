@@ -1,5 +1,6 @@
 # Import required libraries
 import os
+import re
 from flask import Flask, request
 import slack
 from slack import WebClient
@@ -37,9 +38,13 @@ def generate_gpt4_response(prompt):
 @slack_events_adapter.on("app_mention")
 def handle_message(event_data):
     event = event_data["event"]
+    bot_user_id = slack_client.auth_test()["user_id"]
     user_input = event["text"]
-    gpt4_response = generate_gpt4_response(user_input)
-    slack_client.chat_postMessage(channel=event["channel"], text=gpt4_response)
+
+    # Check if the bot is mentioned directly
+    if re.search(f"<@{bot_user_id}>", user_input):
+        gpt4_response = generate_gpt4_response(user_input)
+        slack_client.chat_postMessage(channel=event["channel"], text=gpt4_response)
 
 # Start the Flask app
 if __name__ == "__main__":
