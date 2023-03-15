@@ -1,3 +1,4 @@
+python
 # Import required libraries
 import os
 import re
@@ -22,12 +23,21 @@ slack_events_adapter = SlackEventAdapter(SLACK_SIGNING_SECRET, "/slack/events", 
 # Initialize GPT-4 API client
 openai.api_key = GPT4_API_TOKEN
 
+# Function to fetch the last 10 messages from the channel
+def fetch_last_10_messages(channel_id):
+    response = slack_client.conversations_history(channel=channel_id, limit=10)
+    messages = response["messages"]
+    return messages
+
 # Function to generate a response from GPT-4
-def generate_gpt4_response(prompt, system_prompt):
+def generate_gpt4_response(prompt, system_prompt, channel_id):
+    messages = fetch_last_10_messages(channel_id)
+    messages_formatted = [{"role": "user" if msg["user"] != bot_user_id else "assistant", "content": msg["text"]} for msg in messages]
+    messages_formatted.insert(0, {"role": "system", "content": system_prompt})
+
     response = openai.ChatCompletion.create(
         model="gpt-4",
-        messages=[{"role": "system", "content": system_prompt},
-                  {"role": "user", "content": prompt}],
+        messages=messages_formatted,
         max_tokens=2000,
         n=1,
         temperature=0.5,
@@ -43,7 +53,7 @@ def handle_message(event_data):
 
     # Check if the bot is mentioned directly
     if re.search(f"<@{bot_user_id}>", user_input):
-        gpt4_response = generate_gpt4_response(user_input, "You are a helpful assistant.")
+        gpt4_response = generate_gpt4_response(user_input, "You are a helpful assistant.", event["channel"])
         slack_client.chat_postMessage(channel=event["channel"], text=gpt4_response)
 
 # Handle Slash command
@@ -57,7 +67,7 @@ def handle_code_slash_command():
     if not slack.signature.verify_signature(request):
         return jsonify({"error": "Invalid request"}), 403
 
-    gpt4_response = generate_gpt4_response(user_input, "You are a code-writing assistant.")
+    gpt4_response = generate_gpt4_response(user_input, "You are a code-writing assistant.", response_url)
     slack_client.chat_postMessage(channel=response_url, text=gpt4_response)
     return jsonify({"response_type": "in_channel", "text": gpt4_response})
 
