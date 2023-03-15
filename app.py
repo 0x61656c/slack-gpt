@@ -24,15 +24,15 @@ openai.api_key = GPT4_API_TOKEN
 
 # Function to generate a response from GPT-4
 def generate_gpt4_response(prompt):
-    response = openai.Completion.create(
-        engine="gpt-4",
-        prompt=prompt,
+    response = openai.ChatCompletion.create(
+        model="gpt-4",
+        messages=[{"role": "system", "content": "You are a helpful assistant."},
+                  {"role": "user", "content": prompt}],
         max_tokens=100,
         n=1,
-        stop=None,
         temperature=0.5,
     )
-    return response.choices[0].text.strip()
+    return response.choices[0].message["content"].strip()
 
 # Event handler for receiving a message in Slack
 @slack_events_adapter.on("app_mention")
