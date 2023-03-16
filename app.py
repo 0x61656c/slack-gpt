@@ -1,4 +1,3 @@
-python
 # Import required libraries
 import os
 import re
@@ -23,22 +22,25 @@ slack_events_adapter = SlackEventAdapter(SLACK_SIGNING_SECRET, "/slack/events", 
 # Initialize GPT-4 API client
 openai.api_key = GPT4_API_TOKEN
 
-# Function to fetch the last 10 messages from the channel
-def fetch_last_10_messages(channel_id):
-    response = slack_client.conversations_history(channel=channel_id, limit=10)
-    messages = response["messages"]
-    return messages
-
 # Function to generate a response from GPT-4
-def generate_gpt4_response(prompt, system_prompt, channel_id):
-    messages = fetch_last_10_messages(channel_id)
-    messages_formatted = [{"role": "user" if msg["user"] != bot_user_id else "assistant", "content": msg["text"]} for msg in messages]
-    messages_formatted.insert(0, {"role": "system", "content": system_prompt})
-
+def generate_gpt4_response(prompt):
     response = openai.ChatCompletion.create(
         model="gpt-4",
-        messages=messages_formatted,
-        max_tokens=2000,
+        messages=[{"role": "system", "content": "You are a helpful assistant."},
+                  {"role": "user", "content": prompt}],
+        max_tokens=100,
+        n=1,
+        temperature=0.5,
+    )
+    return response.choices[0].message["content"].strip()
+
+# Function to generate a response from GPT-4 with a custom system message
+def generate_gpt4_code_response(prompt):
+    response = openai.ChatCompletion.create(
+        model="gpt-4",
+        messages=[{"role": "system", "content": "You are a code-generating assistant."},
+                  {"role": "user", "content": prompt}],
+        max_tokens=100,
         n=1,
         temperature=0.5,
     )
@@ -53,23 +55,16 @@ def handle_message(event_data):
 
     # Check if the bot is mentioned directly
     if re.search(f"<@{bot_user_id}>", user_input):
-        gpt4_response = generate_gpt4_response(user_input, "You are a helpful assistant.", event["channel"])
+        gpt4_response = generate_gpt4_response(user_input)
         slack_client.chat_postMessage(channel=event["channel"], text=gpt4_response)
 
-# Handle Slash command
-@app.route("/code", methods=["POST"])
-def handle_code_slash_command():
-    data = request.form
-    user_input = data.get("text")
-    response_url = data.get("response_url")
-
-    # Verify the request is from Slack
-    if not slack.signature.verify_signature(request):
-        return jsonify({"error": "Invalid request"}), 403
-
-    gpt4_response = generate_gpt4_response(user_input, "You are a code-writing assistant.", response_url)
-    slack_client.chat_postMessage(channel=response_url, text=gpt4_response)
-    return jsonify({"response_type": "in_channel", "text": gpt4_response})
+# Slash command handler for /code
+@app.route("/slack/code", methods=["POST"])
+def handle_slash_code():
+    prompt = request.form["text"]
+    response_text = generate_gpt4_code_response(prompt)
+    response = {"response_type": "in_channel", "text": response_text}
+    return jsonify(response)
 
 # Start the Flask app
 if __name__ == "__main__":
