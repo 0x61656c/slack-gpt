@@ -60,7 +60,7 @@ def handle_message(event_data):
             result = slack_client.conversations_history(
                 channel=event["channel"],
                 latest=event["ts"],
-                limit=10,
+                limit=20,
                 inclusive=False
             )
             conversation_history = result["messages"]
@@ -78,7 +78,7 @@ def handle_message(event_data):
 
         # Generate a response using the context
         gpt4_response = generate_gpt4_response_with_context(messages)
-        slack_client.chat_postMessage(channel=event["channel"], text=gpt4_response)
+        slack_client.chat_postMessage(channel=event["channel"], text=gpt4_response, thread_ts=event["ts"])
 
 # Slash command handler for /code
 @app.route("/slack/code", methods=["POST"])
