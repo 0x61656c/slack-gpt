@@ -28,7 +28,7 @@ def generate_gpt4_response(prompt):
         model="gpt-4",
         messages=[{"role": "system", "content": "You are a helpful assistant."},
                   {"role": "user", "content": prompt}],
-        max_tokens=100,
+        max_tokens=2000,
         n=1,
         temperature=0.5,
     )
@@ -68,7 +68,7 @@ def handle_message(event_data):
             print(f"Error fetching conversation history: {e}")
 
         # Prepare the context for GPT-4
-        messages = [{"role": "system", "content": "You are a helpful assistant."}]
+        messages = [{"role": "system", "content": "You are a helpful slackbot assistant."}]
         for message in reversed(conversation_history):
             role = "user" if message.get("user") != bot_user_id else "assistant"
             content = message["text"]
