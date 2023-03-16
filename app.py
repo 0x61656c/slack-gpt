@@ -60,7 +60,7 @@ def handle_message(event_data):
             result = slack_client.conversations_history(
                 channel=event["channel"],
                 latest=event["ts"],
-                limit=20,
+                limit=10,
                 inclusive=False
             )
             conversation_history = result["messages"]
@@ -70,7 +70,7 @@ def handle_message(event_data):
         # Prepare the context for GPT-4
         messages = [{"role": "system", "content": "You are a helpful assistant."}]
         for message in reversed(conversation_history):
-            role = "user" if message["user"] != bot_user_id else "assistant"
+            role = "user" if message.get("user") != bot_user_id else "assistant"
             content = message["text"]
             messages.append({"role": role, "content": content})
 
