@@ -34,12 +34,11 @@ def generate_gpt4_response(prompt):
     )
     return response.choices[0].message["content"].strip()
 
-# Function to generate a response from GPT-4 with a custom system message
-def generate_gpt4_code_response(prompt):
+# Function to generate a response from GPT-4 with conversation history as context
+def generate_gpt4_response_with_context(messages):
     response = openai.ChatCompletion.create(
         model="gpt-4",
-        messages=[{"role": "system", "content": "You are a code-generating assistant."},
-                  {"role": "user", "content": prompt}],
+        messages=messages,
         max_tokens=100,
         n=1,
         temperature=0.5,
@@ -55,7 +54,30 @@ def handle_message(event_data):
 
     # Check if the bot is mentioned directly
     if re.search(f"<@{bot_user_id}>", user_input):
-        gpt4_response = generate_gpt4_response(user_input)
+        # Fetch the last 10 messages in the thread
+        conversation_history = []
+        try:
+            result = slack_client.conversations_history(
+                channel=event["channel"],
+                latest=event["ts"],
+                limit=10,
+                inclusive=False
+            )
+            conversation_history = result["messages"]
+        except Exception as e:
+            print(f"Error fetching conversation history: {e}")
+
+        # Prepare the context for GPT-4
+        messages = [{"role": "system", "content": "You are a helpful assistant."}]
+        for message in reversed(conversation_history):
+            role = "user" if message["user"] != bot_user_id else "assistant"
+            content = message["text"]
+            messages.append({"role": role, "content": content})
+
+        messages.append({"role": "user", "content": user_input})
+
+        # Generate a response using the context
+        gpt4_response = generate_gpt4_response_with_context(messages)
         slack_client.chat_postMessage(channel=event["channel"], text=gpt4_response)
 
 # Slash command handler for /code
