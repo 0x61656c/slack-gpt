@@ -39,7 +39,7 @@ def generate_gpt4_response_with_context(messages):
     response = openai.ChatCompletion.create(
         model="gpt-4",
         messages=messages,
-        max_tokens=100,
+        max_tokens=2000,
         n=1,
         temperature=0.5,
     )
