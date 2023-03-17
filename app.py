@@ -16,7 +16,7 @@ GPT4_API_TOKEN = os.environ.get("GPT4_API_TOKEN")
 app = Flask(__name__)
 
 # Initialize Slack client and event adapter
-slack_client = WebClient(token=SLACK_API_TOKEN)
+slack_client = WebClient(token=SLACK_API_TOKEN, retry_enabled=False)
 slack_events_adapter = SlackEventAdapter(SLACK_SIGNING_SECRET, "/slack/events", app)
 
 # Initialize GPT-4 API client
