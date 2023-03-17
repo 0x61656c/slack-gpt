@@ -60,7 +60,7 @@ def handle_message(event_data):
     event = event_data["event"]
     bot_user_id = slack_client.auth_test()["user_id"]
     user_input = event["text"]
-    thread_ts = event["ts"]
+    thread_ts = event.get("thread_ts") or event["ts"]
 
     # Check if the bot is mentioned directly
     if re.search(f"<@{bot_user_id}>", user_input):
@@ -86,7 +86,7 @@ def handle_message(event_data):
 
         # Generate a response using the context
         gpt4_response = generate_gpt4_response_with_context(messages)
-        slack_client.chat_postMessage(channel=event["channel"], text=gpt4_response, thread_ts=event["ts"])
+        slack_client.chat_postMessage(channel=event["channel"], text=gpt4_response, thread_ts=thread_ts)
 
 # Slash command handler for /code
 @app.route("/slack/code", methods=["POST"])
