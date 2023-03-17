@@ -28,24 +28,12 @@ slack_events_adapter = SlackEventAdapter(SLACK_SIGNING_SECRET, "/slack/events", 
 # Initialize GPT-4 API client
 openai.api_key = GPT4_API_TOKEN
 
-# Function to generate a response from GPT-4
-def generate_gpt4_response(prompt):
-    response = openai.ChatCompletion.create(
-        model="gpt-4",
-        messages=[{"role": "system", "content": "You are a helpful slackbot assistant."},
-                  {"role": "user", "content": prompt}],
-        max_tokens=6000,
-        n=1,
-        temperature=0.5,
-    )
-    return response.choices[0].message["content"].strip()
-
 # Function to generate a response from GPT-4 with conversation history as context
 def generate_gpt4_response_with_context(messages):
     response = openai.ChatCompletion.create(
         model="gpt-4",
         messages=messages,
-        max_tokens=6000,
+        max_tokens=2000,
         n=1,
         temperature=0.5,
     )
