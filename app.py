@@ -16,7 +16,7 @@ GPT4_API_TOKEN = os.environ.get("GPT4_API_TOKEN")
 app = Flask(__name__)
 
 # Initialize Slack client and event adapter
-slack_client = WebClient(token=SLACK_API_TOKEN, retry_enabled=False)
+slack_client = WebClient(token=SLACK_API_TOKEN)
 slack_events_adapter = SlackEventAdapter(SLACK_SIGNING_SECRET, "/slack/events", app)
 
 # Initialize GPT-4 API client
@@ -26,7 +26,7 @@ openai.api_key = GPT4_API_TOKEN
 def generate_gpt4_response(prompt):
     response = openai.ChatCompletion.create(
         model="gpt-4",
-        messages=[{"role": "system", "content": "You are a helpful assistant."},
+        messages=[{"role": "system", "content": "You are a helpful slackbot assistant."},
                   {"role": "user", "content": prompt}],
         max_tokens=2000,
         n=1,
