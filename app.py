@@ -48,6 +48,9 @@ def generate_gpt4_response_with_context(messages):
 # Event handler for receiving a message in Slack
 @slack_events_adapter.on("app_mention")
 def handle_message(event_data):
+    retry_num = request.headers.get('X-Slack-Retry-Num')
+    if retry_num and int(retry_num) > 0:
+        return "OK", 200
     event = event_data["event"]
     bot_user_id = slack_client.auth_test()["user_id"]
     user_input = event["text"]
