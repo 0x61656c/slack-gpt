@@ -43,7 +43,7 @@ def generate_gpt4_response(prompt):
 # Function to generate a response from GPT-4 with conversation history as context
 def generate_gpt4_response_with_context(messages):
     response = openai.ChatCompletion.create(
-        model="gpt-4",
+        model="gpt-4-32k",
         messages=messages,
         max_tokens=6000,
         n=1,
