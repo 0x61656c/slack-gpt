@@ -87,40 +87,6 @@ def handle_message(event_data):
         # Generate a response using the context
         gpt4_response = generate_gpt4_response_with_context(messages)
         slack_client.chat_postMessage(channel=event["channel"], text=gpt4_response, thread_ts=event["ts"])
-    retry_num = request.headers.get('X-Slack-Retry-Num')
-    if retry_num and int(retry_num) > 0:
-        return "OK", 200
-    event = event_data["event"]
-    bot_user_id = slack_client.auth_test()["user_id"]
-    user_input = event["text"]
-
-    # Check if the bot is mentioned directly
-    if re.search(f"<@{bot_user_id}>", user_input):
-        # Fetch the last 10 messages in the thread
-        conversation_history = []
-        try:
-            result = slack_client.conversations_history(
-                channel=event["channel"],
-                latest=event["ts"],
-                limit=10,
-                inclusive=False
-            )
-            conversation_history = result["messages"]
-        except Exception as e:
-            print(f"Error fetching conversation history: {e}")
-
-        # Prepare the context for GPT-4
-        messages = [{"role": "system", "content": "You are a helpful slackbot assistant."}]
-        for message in reversed(conversation_history):
-            role = "user" if message.get("user") != bot_user_id else "assistant"
-            content = message["text"]
-            messages.append({"role": role, "content": content})
-
-        messages.append({"role": "user", "content": user_input})
-
-        # Generate a response using the context
-        gpt4_response = generate_gpt4_response_with_context(messages)
-        slack_client.chat_postMessage(channel=event["channel"], text=gpt4_response, thread_ts=event["ts"])
 
 # Slash command handler for /code
 @app.route("/slack/code", methods=["POST"])
