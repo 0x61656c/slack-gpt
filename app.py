@@ -28,6 +28,13 @@ slack_events_adapter = SlackEventAdapter(SLACK_SIGNING_SECRET, "/slack/events", 
 # Initialize GPT-4 API client
 openai.api_key = GPT4_API_TOKEN
 
+def filter_code_from_response(response_text):
+    # Use regex to search for code blocks
+    code_blocks = re.findall(r'```.+?```', response_text, re.DOTALL)
+    # Remove backticks and join code blocks together
+    code_only = "\n".join(block[3:-3] for block in code_blocks)
+    return code_only
+
 # Function to generate a response from GPT-4 with conversation history as context
 def generate_gpt4_response_with_context(messages):
     response = openai.ChatCompletion.create(
@@ -81,7 +88,13 @@ def handle_message(event_data):
 def handle_slash_code():
     prompt = request.form["text"]
     response_text = generate_gpt4_code_response(prompt)
-    response = {"response_type": "in_channel", "text": response_text}
+    code_only = filter_code_from_response(response_text)
+    
+    if code_only:
+        response = {"response_type": "in_channel", "text": f"```{code_only}```"}
+    else:
+        response = {"response_type": "in_channel", "text": "Sorry, I couldn't generate any code based on your input."}
+    
     return jsonify(response)
 
 # Start the Flask app
