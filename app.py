@@ -6,6 +6,12 @@ import slack
 from slack import WebClient
 from slackeventsapi import SlackEventAdapter
 import openai
+import sentry_sdk
+
+sentry_sdk.init(
+    dsn="https://7f314340aa0742c7aa30c562a670a27c@o339809.ingest.sentry.io/4504848446062592",
+    traces_sample_rate=1.0
+)
 
 # Set your API tokens for Slack and GPT-4 (replace with your actual tokens)
 SLACK_API_TOKEN = os.environ.get("SLACK_API_TOKEN")

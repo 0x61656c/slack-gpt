@@ -3,3 +3,4 @@ slackeventsapi
 openai
 Flask
 gunicorn
+sentry-sdk
