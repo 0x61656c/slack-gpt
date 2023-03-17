@@ -31,7 +31,7 @@ openai.api_key = GPT4_API_TOKEN
 # Function to generate a response from GPT-4
 def generate_gpt4_response(prompt):
     response = openai.ChatCompletion.create(
-        model="gpt-4",
+        model="gpt-4-32k",
         messages=[{"role": "system", "content": "You are a helpful slackbot assistant."},
                   {"role": "user", "content": prompt}],
         max_tokens=6000,
