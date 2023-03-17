@@ -69,7 +69,7 @@ def handle_message(event_data):
             result = slack_client.conversations_history(
                 channel=event["channel"],
                 latest=event["ts"],
-                limit=50,
+                limit=10,
                 inclusive=False
             )
             conversation_history = result["messages"]
