@@ -39,8 +39,8 @@ def generate_gpt4_response_with_context(messages):
     )
     return response.choices[0].message["content"].strip()
 
-
-@slack_events_adapter.on("message.channels")
+# Event handler for receiving a message in Slack
+@slack_events_adapter.on("app_mention")
 def handle_message(event_data):
     retry_num = request.headers.get('X-Slack-Retry-Num')
     if retry_num and int(retry_num) > 0:
@@ -51,7 +51,7 @@ def handle_message(event_data):
     thread_ts = event.get("thread_ts") or event["ts"]
 
     # Check if the bot is mentioned directly
-    if re.search(f"marco", user_input):
+    if re.search(f"<@{bot_user_id}>", user_input):
         # Fetch the messages in the current thread
         conversation_history = []
         try:
@@ -62,8 +62,8 @@ def handle_message(event_data):
             conversation_history = result["messages"]
         except Exception as e:
             print(f"Error fetching conversation history: {e}")
-    
-    slack_client.chat_postMessage(channel=event["channel"], text='polo', thread_ts=thread_ts)
+        
+        slack_client.chat_postMessage(channel=event["channel"], text="polo", thread_ts=thread_ts)
 
 # Start the Flask app
 if __name__ == "__main__":
