@@ -39,9 +39,35 @@ def generate_gpt4_response_with_context(messages):
     )
     return response.choices[0].message["content"].strip()
 
+
+@slack_events_adapter.on("message.channels")
+def handle_message(event_data):
+    retry_num = request.headers.get('X-Slack-Retry-Num')
+    if retry_num and int(retry_num) > 0:
+        return "OK", 200
+    event = event_data["event"]
+    bot_user_id = slack_client.auth_test()["user_id"]
+    user_input = event["text"]
+    thread_ts = event.get("thread_ts") or event["ts"]
+
+    # Check if the bot is mentioned directly
+    if re.search(f"<@{bot_user_id}>", user_input):
+        # Fetch the messages in the current thread
+        conversation_history = []
+        try:
+            result = slack_client.conversations_replies(
+                channel=event["channel"],
+                ts=thread_ts
+            )
+            conversation_history = result["messages"]
+        except Exception as e:
+            print(f"Error fetching conversation history: {e}")
+    
+    slack_client.chat_postMessage(channel=event["channel"], text='ping', thread_ts=thread_ts)
+
 # Event handler for receiving a message in Slack
 @slack_events_adapter.on("app_mention")
-def handle_message(event_data):
+def gpt_handle_message(event_data):
     retry_num = request.headers.get('X-Slack-Retry-Num')
     if retry_num and int(retry_num) > 0:
         return "OK", 200
@@ -64,7 +90,9 @@ def handle_message(event_data):
             print(f"Error fetching conversation history: {e}")
 
         # Prepare the context for GPT-4
-        messages = [{"role": "system", "content": "You are a helpful slackbot assistant."}]
+        messages = [
+            {"role": "system", "content": "You are a helpful slackbot assistant."}
+        ]
         for message in reversed(conversation_history):
             role = "user" if message.get("user") != bot_user_id else "assistant"
             content = message["text"]
