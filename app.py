@@ -53,7 +53,7 @@ def handle_message(event_data):
         slack_client.chat_postMessage(channel=event["channel"], text=slack_response, thread_ts=thread_ts)
 
     # Check if the message mentions Aaron or Paris and it's not Monday or Friday
-    if re.search("Aaron|Paris", user_input):
+    if re.search("U012Z5J50M8", user_input):
         current_day = datetime.now().strftime('%A')
         if current_day not in ['Monday', 'Friday']:
             slack_response = "Hi there! It seems you are trying to reach a member of our team who is not available today. Please leave your message and they will get back to you as soon as they can."
