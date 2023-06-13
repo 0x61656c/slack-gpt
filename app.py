@@ -23,8 +23,9 @@ app = Flask(__name__)
 # Initialize Slack client and event adapter
 slack_client = WebClient(token=SLACK_API_TOKEN)
 slack_events_adapter = SlackEventAdapter(SLACK_SIGNING_SECRET, "/slack/events", app)
+from datetime import datetime
 
-@slack_events_adapter.on("app_mention")
+@slack_events_adapter.on("message")
 def handle_message(event_data):
     retry_num = request.headers.get('X-Slack-Retry-Num')
     if retry_num and int(retry_num) > 0:
@@ -33,7 +34,8 @@ def handle_message(event_data):
     bot_user_id = slack_client.auth_test()["user_id"]
     user_input = event["text"]
     thread_ts = event.get("thread_ts") or event["ts"]
-
+    channel = event["channel"]
+    
     # Check if the bot is mentioned directly
     if re.search(f"<@{bot_user_id}>", user_input):
         # Fetch the messages in the current thread
@@ -49,6 +51,18 @@ def handle_message(event_data):
 
         slack_response = "Thanks for requesting support from Tangram. Please only fill out this form if you have an urgent error that is hindering your platform's ability to operate. Here's the link to file:  https://form.typeform.com/to/TWWlou8R"
         slack_client.chat_postMessage(channel=event["channel"], text=slack_response, thread_ts=thread_ts)
+
+    # Check if the message mentions Aaron or Paris and it's not Monday or Friday
+    if re.search("<@Aaron>|<@Paris>", user_input):
+        current_day = datetime.now().strftime('%A')
+        if current_day not in ['Monday', 'Friday']:
+            slack_response = "Hi there! It seems you are trying to reach Aaron or Paris. They are not available today. Please leave your message and they will get back to you as soon as they can."
+            slack_client.chat_postMessage(channel=channel, text=slack_response, thread_ts=thread_ts)
+
+# Start the Flask app
+if __name__ == "__main__":
+    app.run(port=int(os.environ.get("PORT", 3000)), debug=True)
+
 
 # Start the Flask app
 if __name__ == "__main__":
