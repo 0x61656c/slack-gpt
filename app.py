@@ -47,7 +47,7 @@ def handle_message(event_data):
         except Exception as e:
             print(f"Error fetching conversation history: {e}")
 
-        slack_response = "polo"
+        slack_response = "Thanks for requesting support from Tangram. Please only fill out this form if you have an urgent error that is hindering your platform's ability to operate. Here's the link to file:  https://form.typeform.com/to/TWWlou8R"
         slack_client.chat_postMessage(channel=event["channel"], text=slack_response, thread_ts=thread_ts)
 
 # Start the Flask app
