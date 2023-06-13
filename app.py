@@ -16,7 +16,6 @@ sentry_sdk.init(
 # Set your API tokens for Slack and GPT-4 (replace with your actual tokens)
 SLACK_API_TOKEN = os.environ.get("SLACK_API_TOKEN")
 SLACK_SIGNING_SECRET = os.environ.get("SLACK_SIGNING_SECRET")
-GPT4_API_TOKEN = os.environ.get("GPT4_API_TOKEN")
 
 # Initialize Flask app
 app = Flask(__name__)
