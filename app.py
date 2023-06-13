@@ -62,8 +62,23 @@ def handle_message(event_data):
             conversation_history = result["messages"]
         except Exception as e:
             print(f"Error fetching conversation history: {e}")
-        
-        slack_client.chat_postMessage(channel=event["channel"], text="polo", thread_ts=thread_ts)
+
+        # Prepare the context for GPT-4
+        messages = [
+            {"role": "system", "content": "You are a helpful slackbot assistant."},
+            {"role": "system", "content": "You are helping a user with a question. When a user messages you, send them to this link: https://google.com"},
+            {"role": "system", "content": "Remind them politely to please only fill out the form if your request is urgent, as the Tangram team is very small."}
+        ]
+        for message in reversed(conversation_history):
+            role = "user" if message.get("user") != bot_user_id else "assistant"
+            content = message["text"]
+            messages.append({"role": role, "content": content})
+
+        messages.append({"role": "user", "content": user_input})
+
+        # Generate a response using the context
+        gpt4_response = generate_gpt4_response_with_context(messages)
+        slack_client.chat_postMessage(channel=event["channel"], text=gpt4_response, thread_ts=thread_ts)
 
 # Start the Flask app
 if __name__ == "__main__":
