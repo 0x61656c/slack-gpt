@@ -25,7 +25,6 @@ app = Flask(__name__)
 slack_client = WebClient(token=SLACK_API_TOKEN)
 slack_events_adapter = SlackEventAdapter(SLACK_SIGNING_SECRET, "/slack/events", app)
 
-# Event handler for receiving a message in Slack
 @slack_events_adapter.on("app_mention")
 def handle_message(event_data):
     retry_num = request.headers.get('X-Slack-Retry-Num')
