@@ -62,8 +62,3 @@ def handle_message(event_data):
 # Start the Flask app
 if __name__ == "__main__":
     app.run(port=int(os.environ.get("PORT", 3000)), debug=True)
-
-
-# Start the Flask app
-if __name__ == "__main__":
-    app.run(port=int(os.environ.get("PORT", 3000)), debug=True)
