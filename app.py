@@ -54,7 +54,7 @@ def handle_message(event_data):
         slack_client.chat_postMessage(channel=event["channel"], text=slack_response, thread_ts=thread_ts)
 
     # Check if the message mentions Aaron and it's not Monday or Friday and the message sender is not the
-    if re.search("U012Z5J50M8", user_input) && user_id != bot_user_id:
+    if re.search("U012Z5J50M8", user_input) and user_id != bot_user_id:
         current_day = datetime.now().strftime('%A')
         if current_day not in ['Monday', 'Friday']:
             if current_day in ['Saturday', 'Sunday']:
@@ -63,7 +63,7 @@ def handle_message(event_data):
                 slack_response = f"<@{user_id}> Aaron is currently unavailable for support--his next available complimentary support window is 9am-5pm on Friday. If you need help with an urgent bug, please file a support ticket here: https://form.typeform.com/to/TWWlou8R"
             slack_client.chat_postMessage(channel=channel, text=slack_response, thread_ts=thread_ts)
 
-    if re.search("U012SDDLX8E", user_input) && user_id != bot_user_id:
+    if re.search("U012SDDLX8E", user_input) and user_id != bot_user_id:
         current_day = datetime.now().strftime('%A')
         if current_day not in ['Monday', 'Friday']:
             if current_day in ['Saturday', 'Sunday']:
