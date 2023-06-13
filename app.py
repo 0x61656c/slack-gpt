@@ -52,12 +52,19 @@ def handle_message(event_data):
         slack_response = "Thanks for requesting support from Tangram. Please only fill out this form if you have an urgent error that is hindering your platform's ability to operate. Here's the link to file:  https://form.typeform.com/to/TWWlou8R"
         slack_client.chat_postMessage(channel=event["channel"], text=slack_response, thread_ts=thread_ts)
 
-    # Check if the message mentions Aaron or Paris and it's not Monday or Friday
+    # Check if the message mentions Aaron and it's not Monday or Friday
     if re.search("U012Z5J50M8", user_input):
         current_day = datetime.now().strftime('%A')
         if current_day not in ['Monday', 'Friday']:
-            slack_response = "Hi there! It seems you are trying to reach a member of our team who is not available today. Please leave your message and they will get back to you as soon as they can."
+            slack_response = "Aaron is unavailable for complimentary live customer support today. He is regularly available on Mondays and Fridays from 9am-5pm EST. If you need help with an urgent bug, please file a support ticket here: https://form.typeform.com/to/TWWlou8R"
             slack_client.chat_postMessage(channel=channel, text=slack_response, thread_ts=thread_ts)
+
+    if re.search("U012SDDLX8E", user_input):
+        current_day = datetime.now().strftime('%A')
+        if current_day not in ['Monday', 'Friday']:
+            slack_response = "Paris is unavailable for complimentary live customer support today--She is regularly available on Mondays and Fridays from 9am-5pm EST. If you need help with an urgent bug, please file a support ticket here: https://form.typeform.com/to/TWWlou8R"
+            slack_client.chat_postMessage(channel=channel, text=slack_response, thread_ts=thread_ts)
+
 
 # Start the Flask app
 if __name__ == "__main__":
