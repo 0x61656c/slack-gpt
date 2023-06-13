@@ -35,6 +35,7 @@ def handle_message(event_data):
     user_input = event["text"]
     thread_ts = event.get("thread_ts") or event["ts"]
     channel = event["channel"]
+    user_id = event["user"]
     
     # Check if the bot is mentioned directly
     if re.search(f"<@{bot_user_id}>", user_input):
@@ -57,18 +58,18 @@ def handle_message(event_data):
         current_day = datetime.now().strftime('%A')
         if current_day not in ['Monday', 'Friday']:
             if current_day in ['Saturday', 'Sunday']:
-                slack_response = "<@{user_id}> Aaron is currently unavailable for support--his next available complimentary support window is 9am-5pm on Monday. If you need help with an urgent bug, please file a support ticket here: https://form.typeform.com/to/TWWlou8R"
+                slack_response = f"<@{user_id}> Aaron is currently unavailable for support--his next available complimentary support window is 9am-5pm on Monday. If you need help with an urgent bug, please file a support ticket here: https://form.typeform.com/to/TWWlou8R"
             else:
-                slack_response = "<@{user_id}> Aaron is currently unavailable for support--his next available complimentary support window is 9am-5pm on Friday. If you need help with an urgent bug, please file a support ticket here: https://form.typeform.com/to/TWWlou8R"
+                slack_response = f"<@{user_id}> Aaron is currently unavailable for support--his next available complimentary support window is 9am-5pm on Friday. If you need help with an urgent bug, please file a support ticket here: https://form.typeform.com/to/TWWlou8R"
             slack_client.chat_postMessage(channel=channel, text=slack_response, thread_ts=thread_ts)
 
     if re.search("U012SDDLX8E", user_input):
         current_day = datetime.now().strftime('%A')
         if current_day not in ['Monday', 'Friday']:
             if current_day in ['Saturday', 'Sunday']:
-                slack_response = "Paris is currently unavailable for support--Her next available complimentary support window is 9am-5pm on Monday. If you need help with an urgent bug, please file a support ticket here: https://form.typeform.com/to/TWWlou8R"
+                slack_response = f"<@{user_id}> Paris is currently unavailable for support--Her next available complimentary support window is 9am-5pm on Monday. If you need help with an urgent bug, please file a support ticket here: https://form.typeform.com/to/TWWlou8R"
             else:
-                slack_response = "Paris is currently unavailable for support--Her next available complimentary support window is 9am-5pm on Friday. If you need help with an urgent bug, please file a support ticket here: https://form.typeform.com/to/TWWlou8R"
+                slack_response = f"<@{user_id}> Paris is currently unavailable for support--Her next available complimentary support window is 9am-5pm on Friday. If you need help with an urgent bug, please file a support ticket here: https://form.typeform.com/to/TWWlou8R"
             slack_client.chat_postMessage(channel=channel, text=slack_response, thread_ts=thread_ts)
 
 # Start the Flask app
