@@ -25,20 +25,6 @@ app = Flask(__name__)
 slack_client = WebClient(token=SLACK_API_TOKEN)
 slack_events_adapter = SlackEventAdapter(SLACK_SIGNING_SECRET, "/slack/events", app)
 
-# Initialize GPT-4 API client
-openai.api_key = GPT4_API_TOKEN
-
-# Function to generate a response from GPT-4 with conversation history as context
-def generate_gpt4_response_with_context(messages):
-    response = openai.ChatCompletion.create(
-        model="gpt-4",
-        messages=messages,
-        max_tokens=2000,
-        n=1,
-        temperature=0.5,
-    )
-    return response.choices[0].message["content"].strip()
-
 # Event handler for receiving a message in Slack
 @slack_events_adapter.on("app_mention")
 def handle_message(event_data):
@@ -63,22 +49,8 @@ def handle_message(event_data):
         except Exception as e:
             print(f"Error fetching conversation history: {e}")
 
-        # Prepare the context for GPT-4
-        messages = [
-            {"role": "system", "content": "You are a helpful slackbot assistant."},
-            {"role": "system", "content": "You are helping a user with a question. When a user messages you, send them to this link: https://google.com"},
-            {"role": "system", "content": "Remind them politely to please only fill out the form if your request is urgent, as the Tangram team is very small."}
-        ]
-        for message in reversed(conversation_history):
-            role = "user" if message.get("user") != bot_user_id else "assistant"
-            content = message["text"]
-            messages.append({"role": role, "content": content})
-
-        messages.append({"role": "user", "content": user_input})
-
-        # Generate a response using the context
-        gpt4_response = generate_gpt4_response_with_context(messages)
-        slack_client.chat_postMessage(channel=event["channel"], text=gpt4_response, thread_ts=thread_ts)
+        slack_response = "polo"
+        slack_client.chat_postMessage(channel=event["channel"], text=slack_response, thread_ts=thread_ts)
 
 # Start the Flask app
 if __name__ == "__main__":
